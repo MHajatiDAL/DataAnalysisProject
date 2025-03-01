@@ -1,0 +1,42 @@
+[1] "Male Unemployment Model (10-Year Lag):"
+
+Call:
+lm(formula = Unemployment_Male ~ Govt_Expenditure_Education_Lagged, 
+    data = df_lagged)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.22334 -0.08840 -0.04093  0.04830  0.77876 
+
+Coefficients:
+                                   Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                        0.229130   0.006434  35.612   <2e-16 ***
+Govt_Expenditure_Education_Lagged -0.043490   0.021454  -2.027   0.0427 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.1513 on 3443 degrees of freedom
+Multiple R-squared:  0.001192,	Adjusted R-squared:  0.000902 
+F-statistic: 4.109 on 1 and 3443 DF,  p-value: 0.04272
+
+[1] "Data/Female Unemployment Model (10-Year Lag):"
+
+Call:
+lm(formula = Unemployment_Female ~ Govt_Expenditure_Education_Lagged, 
+    data = df_lagged)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.20563 -0.09662 -0.04996  0.05832  0.80281 
+
+Coefficients:
+                                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                        0.21580    0.00644  33.507  < 2e-16 ***
+Govt_Expenditure_Education_Lagged -0.07123    0.02148  -3.317  0.00092 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.1514 on 3443 degrees of freedom
+Multiple R-squared:  0.003185,	Adjusted R-squared:  0.002896 
+F-statistic:    11 on 1 and 3443 DF,  p-value: 0.0009198
+
