@@ -1,0 +1,42 @@
+[1] "Male Unemployment Model:"
+
+Call:
+lm(formula = Unemployment_Male ~ Govt_Expenditure_Education, 
+    data = df_clean)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.37240 -0.08558 -0.03267  0.04427  0.80318 
+
+Coefficients:
+                           Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                0.143049   0.006265   22.83   <2e-16 ***
+Govt_Expenditure_Education 0.269834   0.020876   12.93   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.1477 on 3453 degrees of freedom
+Multiple R-squared:  0.04615,	Adjusted R-squared:  0.04588 
+F-statistic: 167.1 on 1 and 3453 DF,  p-value: < 2.2e-16
+
+[1] "Female Unemployment Model:"
+
+Call:
+lm(formula = Unemployment_Female ~ Govt_Expenditure_Education, 
+    data = df_clean)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.33243 -0.09514 -0.04484  0.05755  0.78809 
+
+Coefficients:
+                           Estimate Std. Error t value Pr(>|t|)    
+(Intercept)                0.128852   0.006306   20.43   <2e-16 ***
+Govt_Expenditure_Education 0.245184   0.021011   11.67   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.1486 on 3453 degrees of freedom
+Multiple R-squared:  0.03794,	Adjusted R-squared:  0.03766 
+F-statistic: 136.2 on 1 and 3453 DF,  p-value: < 2.2e-16
+
