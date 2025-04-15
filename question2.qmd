@@ -1,0 +1,158 @@
+---
+title: "question2"
+format: pdf
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(lme4)  # For linear mixed models
+```
+
+```{r}
+facttable<-read_csv("./facttable.csv")
+```
+
+```{r}
+
+```
+
+```{r}
+facttable_wide <- facttable %>%
+  pivot_longer(cols = 3:24, names_to = "year", values_to = "value") %>% 
+  pivot_wider(names_from = Indicator, values_from = value)
+
+
+```
+
+```{r}
+
+```
+
+```{r}
+# Select relevant columns and remove missing values
+data <- facttable_wide %>%
+  select("Country Code", year, GB.XPD.RSDV.GD.ZS, TX.VAL.TECH.MF.ZS) %>%
+  na.omit()
+
+```
+
+```{r}
+data %>% 
+  filter(TX.VAL.TECH.MF.ZS < 200) %>% 
+  drop_na() %>%  
+  ggplot(aes(x=TX.VAL.TECH.MF.ZS,)) +
+  geom_histogram(color="white", fill="red") +
+  labs(x = "GDP Growth", colours = "Cylinder")
+```
+
+```{r}
+ggplot(data, aes(x = GB.XPD.RSDV.GD.ZS, y = TX.VAL.TECH.MF.ZS)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", color = "blue") +
+  labs(title = "Government R&D Expenditure vs High-Tech Exports",
+       x = "R&D Expenditure (% of GDP)",
+       y = "High-Tech Exports (% of Manufactured Exports)") +
+  theme_minimal()
+
+
+```
+
+# Build a linear model
+
+```{r}
+lm_model <- lm(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS, data = data)
+summary(lm_model)
+
+```
+
+```{r}
+plot(lm_model)
+```
+
+```{r}
+colnames(data)[colnames(data) == "Country Code"] <- "Country"
+
+```
+
+# Building an LMM with Country as Random Effects
+
+```{r}
+lmm_model <- glmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS + (1 | Country),  data = data)
+summary(lmm_model)
+
+```
+
+# Compare the linear mode with the mixed model to see if indeed there is a random effect.
+
+```{r}
+AIC(lm_model, lmm_model)
+
+```
+
+The comparison of Akaike Information Criterion (AIC) values between the linear model (AIC = 16052.90) and the linear mixed model (AIC = 16044.85) indicates that the mixed-effects model provides a better fit for the data. Since a lower AIC value suggests a more optimal model, this result implies that incorporating random effects to account for country-specific variations improves the explanation of the relationship between government R&D expenditure and high-tech exports. By considering country differences, the mixed model captures heterogeneity more effectively, making it a more suitable choice for understanding how government R&D spending influences high-tech exports across different nations.
+
+# Linear Mixed Models
+
+#### **Random Intercept Model**
+
+```{r}
+# Random Intercept Model
+model_random_intercept <- lmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS + (1 | Country), data = data)
+summary(model_random_intercept)
+
+```
+
+This model assumes that each country has a different baseline level of high-tech exports, but the effect of R&D expenditure is the same across all countries(same slope).
+
+#### **Random Intercept and Random Slope Model**
+
+```{r}
+#Random Intercept and Random Slope Model
+
+model_random_slope <- lmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS + (GB.XPD.RSDV.GD.ZS | Country), data = data)
+summary(model_random_slope)
+
+```
+
+This model assumes that both:
+
+-   Each country has a different baseline level of high-tech exports (random intercept).
+
+-   The effect of R&D expenditure on high-tech exports varies by country (random slope).
+
+```{r}
+# Compare the 2 models;
+anova(model_random_intercept, model_random_slope)
+
+```
+
+The comparison between the random intercept and random slope models shows that the random slope model provides a better fit for the data. The lower AIC (16029 vs. 16051) and BIC (16061 vs. 16072), along with a higher log-likelihood (-8008.6 vs. -8021.4), indicate an improvement in model performance when allowing for random slopes. Additionally, the Chi-square test statistic (25.624, df = 2, p-value = 2.728e-06) confirms that including random slopes significantly enhances the model fit. The highly significant p-value (2.728e-06) suggests that the relationship between government R&D expenditure and high-tech exports varies across countries. Some nations experience a strong positive effect, while others may see weaker or differing impacts. Given this variation, the random slope model is preferred as it captures country-specific differences in how R&D investment translates into high-tech exports. This finding highlights the need to investigate which factors contribute to the differences in slopes among countries, as understanding these variations can provide valuable insights into the conditions under which government R&D spending leads to higher high-tech exports.
+
+```         
+```
+
+```{r}
+facttable_wide
+```
+
+```{r}
+colnames(facttable_wide)[colnames(facttable_wide) == "Country Code"] <- "Country"
+
+```
+
+```{r}
+lmm_extended <- lmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS * (CM.MKT.LCAP.GD.ZS + EG.USE.ELEC.KH.PC + FS.AST.PRVT.GD.ZS + GC.TAX.TOTL.GD.ZS + IT.MLT.MAIN.P2 ) + (GB.XPD.RSDV.GD.ZS | Country), 
+                     data = facttable_wide, REML = FALSE)
+summary(lmm_extended)
+```
+
+```{r}
+anova(lmm_extended)
+```
+
+```{r}
+library(car)
+Anova(lmm_extended, type = "III")
+```
