@@ -1,0 +1,213 @@
+---
+title: "data-analysis"
+format: pdf
+editor: visual
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+library(tidyverse)
+data("facttable")
+facttable %>% 
+  nrow()
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+```{r}
+library(tidyverse)
+#get just the tax tables
+tax <- facttable %>%    
+  filter(Indicator == "GC.TAX.TOTL.GD.ZS") %>%    
+  pivot_longer(3:24, names_to = "year", values_to = "tax")
+
+#get just the gdp tables
+gdp <- facttable %>%    
+  filter(Indicator == "NY.GDP.MKTP.KD.ZG") %>%    
+  pivot_longer(3:24, names_to = "year", values_to = "gdp")
+
+combined_data <- data.frame(gdp, tax)
+
+
+
+```
+
+```{r}
+#scatter plot for tax and gdp
+combined_data %>% 
+  filter(gdp > -20) %>% 
+  drop_na() %>% 
+  ggplot(aes(x=gdp, y=tax)) +
+  geom_point()
+```
+
+```{r}
+#histogram of gdp
+combined_data %>% 
+  filter(gdp > -20) %>% 
+  drop_na() %>%  
+  ggplot(aes(x=gdp,)) +
+  geom_histogram(color="white", fill="red") +
+  labs(x = "GDP Growth", colours = "Cylinder")
+```
+
+```{r}
+combined_data %>% 
+  drop_na() %>%  
+  ggplot(aes(x=gdp,)) +
+  geom_boxplot() 
+```
+
+```{r}
+model <- lm(
+  gdp ~ tax -1,
+  data = combined_data
+)
+
+summary(model)
+```
+
+```{r}
+plot(
+  model,
+  ask = FALSE
+)
+```
+
+```{r}
+tech_exports <- facttable %>%    
+  filter(Indicator == "TX.VAL.TECH.MF.ZS") %>%    
+  pivot_longer(3:24, names_to = "year", values_to = "tech_exports")
+
+research <- facttable %>%    
+  filter(Indicator == "GB.XPD.RSDV.GD.ZS") %>%    
+  pivot_longer(3:24, names_to = "year", values_to = "research")
+
+combined_data2 <- data.frame(tech_exports, research)
+```
+
+```{r}
+combined_data2 %>% 
+  drop_na() %>% 
+  nrow()
+```
+
+```{r}
+#scatter plot for tax and gdp
+combined_data2 %>% 
+  filter(tech_exports < 500) %>% 
+  drop_na() %>% 
+  ggplot(aes(x=tech_exports, y=research)) +
+  geom_point()
+
+```
+
+```{r}
+women_bus_time <- facttable %>%    
+  filter(Indicator == "IC.REG.DURS.FE") %>%  
+  pivot_longer(3:24, names_to = "year", values_to = "women_bus_time") 
+```
+
+```{r}
+men_bus_time <- facttable %>%    
+  filter(Indicator == "IC.REG.DURS.MA") %>%  
+  pivot_longer(3:24, names_to = "year", values_to = "men_bus_time")
+```
+
+```{r}
+mean(men_bus_time$men_bus_time)
+```
+
+```{r}
+mean(women_bus_time$women_bus_time)
+```
+
+```{r}
+women_bus_time %>% 
+  ggplot(aes(women_bus_time)) +
+  geom_boxplot()
+```
+
+```{r}
+men_bus_time %>% 
+  ggplot(aes(men_bus_time)) +
+  geom_boxplot()
+```
+
+```{r}
+women_bus_time %>% 
+  ggplot(aes(women_bus_time)) +
+  geom_histogram()
+```
+
+```{r}
+men_bus_time %>% 
+  ggplot(aes(men_bus_time)) +
+  geom_histogram()
+```
+
+```{r}
+combined_data3 <- data.frame(gdp, women_bus_time)
+
+combined_data3 %>% 
+  ggplot(aes(y=gdp, x=women_bus_time)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+```{r}
+unemployment <- facttable %>%    
+  filter(Indicator == "SL.UEM.TOTL.FE.ZS") %>%    
+  pivot_longer(3:24, names_to = "year", values_to = "unemployment")
+
+education <- facttable %>%    
+  filter(Indicator == "SE.XPD.TOTL.GD.ZS") %>%    
+  pivot_longer(3:24, names_to = "year", values_to = "education")
+
+combined_data2 <- data.frame(education, unemployment)
+```
+
+```{r}
+combined_data2 %>% 
+  drop_na() %>% 
+  ggplot(aes(x=education, y=unemployment)) +
+  geom_point()
+```
+
+```{r}
+facttable_wide <- facttable %>%
+  pivot_longer(cols = 3:24, names_to = "year", values_to = "value") %>% 
+  pivot_wider(names_from = Indicator, values_from = value)
+```
+
+```{r}
+facttable_wide %>%
+  summarise(across(everything(), ~ sum(is.na(.))))
+
+```
+
+```{r}
+data.frame(column = names(facttable_wide), missing_values = colSums(is.na(facttable_wide)))
+
+```
+
+```{r}
+top_10_exports <- facttable_wide %>%
+  arrange(desc(`TX.VAL.TECH.MF.ZS`)) %>%  # Sort by high-tech exports
+  slice_head(n = 10)
+
+print(top_10_exports)
+```

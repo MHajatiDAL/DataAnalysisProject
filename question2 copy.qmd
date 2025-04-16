@@ -34,7 +34,6 @@ facttable_wide <- facttable %>%
 # Select relevant columns and remove missing values
 data <- facttable_wide %>%
   select("Country Code", year, GB.XPD.RSDV.GD.ZS, TX.VAL.TECH.MF.ZS) %>%
-  filter(TX.VAL.TECH.MF.ZS < 500) %>%
   na.omit()
 
 ```
@@ -80,7 +79,7 @@ colnames(data)[colnames(data) == "Country Code"] <- "Country"
 # Building an LMM with Country as Random Effects
 
 ```{r}
-lmm_model <- glmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS + (1 | Country),  data = data)
+lmm_model <- lmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS + (1 | Country), data = data)
 summary(lmm_model)
 
 ```

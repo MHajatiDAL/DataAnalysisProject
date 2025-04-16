@@ -1,0 +1,18 @@
+Package: GlobalIndicatorAnalysis
+Type: Package
+Title: A Data Analysis Package on Global Development Indicators
+Version: 0.1.0
+Author: Bright Ofosu Adams, Mehrad Hajati, Ahnaf Iqbal
+Description: This package provides tools and data for analyzing global development indicators. It includes a function for computing means and a function for plotting histograms. The package also contains cleaned and structured data used in the analysis. All functions and datasets are fully documented and exported. The package includes a vignette that presents the full analysis in a Quarto document.
+Depends: R (>= 4.1.0)
+Imports:
+    dplyr,
+    ggplot2,
+    tidyr,
+    readr,
+    lme4,
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+VignetteBuilder: knitr
+RoxygenNote: 7.3.2

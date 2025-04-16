@@ -1,5 +1,5 @@
 ---
-title: "question2"
+title: "question3"
 format: pdf
 editor: visual
 ---
@@ -22,39 +22,25 @@ facttable<-read_csv("./facttable.csv")
 facttable_wide <- facttable %>%
   pivot_longer(cols = 3:24, names_to = "year", values_to = "value") %>% 
   pivot_wider(names_from = Indicator, values_from = value)
-
-
-```
-
-```{r}
-
 ```
 
 ```{r}
 # Select relevant columns and remove missing values
 data <- facttable_wide %>%
-  select("Country Code", year, GB.XPD.RSDV.GD.ZS, TX.VAL.TECH.MF.ZS) %>%
-  filter(TX.VAL.TECH.MF.ZS < 500) %>%
+  select("Country Code", year, SE.XPD.TOTL.GD.ZS, SL.UEM.TOTL.FE.ZS) %>%
   na.omit()
 
+
+
 ```
 
 ```{r}
-data %>% 
-  filter(TX.VAL.TECH.MF.ZS < 200) %>% 
-  drop_na() %>%  
-  ggplot(aes(x=TX.VAL.TECH.MF.ZS,)) +
-  geom_histogram(color="white", fill="red") +
-  labs(x = "GDP Growth", colours = "Cylinder")
-```
-
-```{r}
-ggplot(data, aes(x = GB.XPD.RSDV.GD.ZS, y = TX.VAL.TECH.MF.ZS)) +
+ggplot(data, aes(x = SE.XPD.TOTL.GD.ZS, y = SL.UEM.TOTL.FE.ZS)) +
   geom_point(alpha = 0.6) +
   geom_smooth(method = "lm", color = "blue") +
-  labs(title = "Government R&D Expenditure vs High-Tech Exports",
-       x = "R&D Expenditure (% of GDP)",
-       y = "High-Tech Exports (% of Manufactured Exports)") +
+  labs(title = "Expenditure on education vs Unemployment",
+       x = "Expenditure on education",
+       y = "Unemployment") +
   theme_minimal()
 
 
@@ -63,7 +49,7 @@ ggplot(data, aes(x = GB.XPD.RSDV.GD.ZS, y = TX.VAL.TECH.MF.ZS)) +
 # Build a linear model
 
 ```{r}
-lm_model <- lm(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS, data = data)
+lm_model <- lm(SL.UEM.TOTL.FE.ZS ~ SE.XPD.TOTL.GD.ZS, data = data)
 summary(lm_model)
 
 ```
@@ -80,7 +66,7 @@ colnames(data)[colnames(data) == "Country Code"] <- "Country"
 # Building an LMM with Country as Random Effects
 
 ```{r}
-lmm_model <- glmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS + (1 | Country),  data = data)
+lmm_model <- lmer(SL.UEM.TOTL.FE.ZS ~ SE.XPD.TOTL.GD.ZS + (1 | Country), data = data)
 summary(lmm_model)
 
 ```
@@ -100,7 +86,7 @@ The comparison of Akaike Information Criterion (AIC) values between the linear m
 
 ```{r}
 # Random Intercept Model
-model_random_intercept <- lmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS + (1 | Country), data = data)
+model_random_intercept <- lmer(SL.UEM.TOTL.FE.ZS ~ SE.XPD.TOTL.GD.ZS + (1 | Country), data = data)
 summary(model_random_intercept)
 
 ```
@@ -112,7 +98,7 @@ This model assumes that each country has a different baseline level of high-tech
 ```{r}
 #Random Intercept and Random Slope Model
 
-model_random_slope <- lmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS + (GB.XPD.RSDV.GD.ZS | Country), data = data)
+model_random_slope <- lmer(SL.UEM.TOTL.FE.ZS ~ SE.XPD.TOTL.GD.ZS + (SE.XPD.TOTL.GD.ZS | Country), data = data)
 summary(model_random_slope)
 
 ```
@@ -144,9 +130,33 @@ colnames(facttable_wide)[colnames(facttable_wide) == "Country Code"] <- "Country
 ```
 
 ```{r}
-lmm_extended <- lmer(TX.VAL.TECH.MF.ZS ~ GB.XPD.RSDV.GD.ZS * (CM.MKT.LCAP.GD.ZS + EG.USE.ELEC.KH.PC + FS.AST.PRVT.GD.ZS + GC.TAX.TOTL.GD.ZS + IT.MLT.MAIN.P2 ) + (GB.XPD.RSDV.GD.ZS | Country), 
+lmm_extended <- lmer(SL.UEM.TOTL.FE.ZS ~ 
+                     SE.XPD.TOTL.GD.ZS * (NY.GDP.MKTP.KD.ZG + GC.TAX.TOTL.GD.ZS + 
+                                          IT.NET.BBND.P2 + SL.TLF.CACT.FE.ZS + 
+                                          FP.CPI.TOTL.ZG) + 
+                     (SE.XPD.TOTL.GD.ZS | Country), 
                      data = facttable_wide, REML = FALSE)
 summary(lmm_extended)
+```
+
+```{r}
+library(interactions)
+interact_plot(lmm_extended, pred = "SE.XPD.TOTL.GD.ZS", modx = "FP.CPI.TOTL.ZG", plot.points = TRUE)
+```
+
+```{r}
+lmm_extended <- lmer(SL.UEM.TOTL.FE.ZS ~ 
+                     SE.XPD.TOTL.GD.ZS * (GC.TAX.TOTL.GD.ZS + 
+                                          IT.NET.BBND.P2 + SL.TLF.CACT.FE.ZS + 
+                                          FP.CPI.TOTL.ZG + CM.MKT.LCAP.GD.ZS + EN.URB.LCTY.UR.ZS + FR.INR.LNDP + FS.AST.PRVT.GD.ZS + TX.VAL.TECH.MF.ZS) + 
+                     (SE.XPD.TOTL.GD.ZS | Country), 
+                     data = facttable_wide, REML = FALSE)
+vcov(summary(lmm_extended))
+```
+
+```{r}
+library(interactions)
+interact_plot(lmm_extended, pred = "SE.XPD.TOTL.GD.ZS", modx = "CM.MKT.LCAP.GD.ZS", plot.points = TRUE)
 ```
 
 ```{r}
@@ -156,4 +166,7 @@ anova(lmm_extended)
 ```{r}
 library(car)
 Anova(lmm_extended, type = "III")
+```
+
+```{}
 ```
